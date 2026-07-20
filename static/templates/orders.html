@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CLOVE — Orders</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&family=Playfair+Display+SC:wght@400;700&display=swap" rel="stylesheet">
+  <script
+    crossorigin="anonymous"
+    integrity="sha384-0HL/VWVbwweJfp0saUL50fXRuSABCdVeinTBoJCDXprLkJ49VI0QMWNGMRt8ebnT"
+    src="https://unpkg.com/react@18.2.0/umd/react.development.js"
+  ></script>
+  <script
+    crossorigin="anonymous"
+    integrity="sha384-79Od0yhavbvtuP2nWl+Y6mwgs8AlknSIikYSw0+uOc65GTyH8SW7e2hCyCB303Y2"
+    src="https://unpkg.com/react-dom@18.2.0/umd/react-dom.development.js"
+  ></script>
+  <script
+    crossorigin="anonymous"
+    integrity="sha384-1qlE7MZPM2pHD/pBZCU/yB8UCP52RYL8bge/qNdfNBCWToySp8/M+JL2waXU4hjJ"
+    src="https://unpkg.com/@babel/standalone@7.23.5/babel.min.js"
+  ></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #EFF6FF;
+      --surface:   #FFFFFF;
+      --surface-2: #EFF6FF;
+      --surface-3: #DBEAFE;
+      --border:    #BFDBFE;
+      --gold:      #2563EB;
+      --gold-dim:  #1E40AF;
+      --text:      #0F172A;
+      --muted:     #64748B;
+      --green:     #059669;
+      --red:       #DC2626;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Karla', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      min-height: 100vh;
+    }
+
+    /* Page shell */
+    main {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+    }
+
+    .page-header {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 2rem;
+    }
+    .page-header h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: var(--gold-dim);
+      font-family: 'Playfair Display SC', Georgia, serif;
+    }
+    .page-header .subtitle {
+      font-size: .85rem;
+      color: var(--muted);
+      margin-top: .25rem;
+    }
+
+    /* Refresh button */
+    .btn-refresh {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--gold-dim);
+      padding: .45rem 1.1rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s, transform .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      font-family: 'Karla', sans-serif;
+    }
+    .btn-refresh:hover { background: var(--gold); color: #fff; border-color: var(--gold); box-shadow: 0 2px 8px rgba(37,99,235,0.25); transform: translateY(-1px); }
+    .btn-refresh:active:not(:disabled) { transform: translateY(0); }
+    .btn-refresh:disabled { opacity: .45; cursor: not-allowed; }
+
+    /* Stats row */
+    .stats {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+    .stat-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 1rem 1.4rem;
+      flex: 1;
+      min-width: 140px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+      transition: box-shadow .15s, transform .15s, border-color .15s;
+    }
+    .stat-card:hover {
+      box-shadow: 0 4px 12px rgba(37,99,235,0.12);
+      border-color: var(--gold);
+      transform: translateY(-2px);
+    }
+    .stat-card .label {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      margin-bottom: .35rem;
+      font-weight: 600;
+    }
+    .stat-card .value {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--gold-dim);
+      font-family: 'Karla', sans-serif;
+    }
+
+    /* Search / filter bar */
+    .toolbar {
+      display: flex;
+      gap: .75rem;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .search-input {
+      flex: 1;
+      min-width: 200px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: .6rem 1rem;
+      color: var(--text);
+      font-size: .9rem;
+      font-family: 'Karla', sans-serif;
+      outline: none;
+      transition: border-color .15s, box-shadow .15s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .search-input:focus { border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217,119,6,0.12); }
+    .search-input::placeholder { color: var(--muted); }
+
+    /* Orders table */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      box-shadow: 0 1px 6px rgba(0,0,0,0.05);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .88rem;
+    }
+    thead {
+      background: var(--surface-2);
+    }
+    th {
+      padding: .85rem 1rem;
+      text-align: left;
+      font-size: .72rem;
+      font-weight: 700;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+      cursor: pointer;
+      user-select: none;
+      font-family: 'Karla', sans-serif;
+    }
+    th:hover { color: var(--text); }
+    th .sort-icon { margin-left: .3rem; opacity: .5; }
+    th.sorted { color: var(--gold-dim); }
+    th.sorted .sort-icon { opacity: 1; }
+
+    tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .12s, box-shadow .12s;
+    }
+    tbody tr:last-child { border-bottom: none; }
+    tbody tr:hover {
+      background: var(--surface-2);
+      box-shadow: inset 0 0 8px rgba(37,99,235,0.05);
+    }
+
+    td {
+      padding: .85rem 1rem;
+      vertical-align: top;
+      color: var(--text);
+    }
+
+    .order-id {
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: .78rem;
+      color: var(--gold);
+      font-weight: 700;
+      background: var(--surface-2);
+      padding: .15rem .4rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .items-list { display: flex; flex-direction: column; gap: .2rem; }
+    .item-row { display: flex; align-items: center; gap: .4rem; }
+    .item-qty {
+      background: var(--surface-3);
+      border-radius: 4px;
+      padding: .1rem .4rem;
+      font-size: .75rem;
+      color: var(--gold-dim);
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-weight: 600;
+      border: 1px solid var(--border);
+    }
+    .item-name { font-size: .85rem; }
+
+    .total {
+      font-weight: 700;
+      color: var(--green);
+      white-space: nowrap;
+    }
+
+    .customer-info { display: flex; flex-direction: column; gap: .15rem; }
+    .customer-name { font-weight: 600; }
+    .customer-phone { font-size: .8rem; color: var(--muted); }
+
+    .pickup-time { font-size: .82rem; color: var(--text); white-space: nowrap; }
+    .no-pickup { color: var(--muted); font-size: .8rem; }
+
+    .created-at { font-size: .8rem; color: var(--muted); white-space: nowrap; }
+
+    /* Empty / error / loading states */
+    .state-box {
+      text-align: center;
+      padding: 4rem 2rem;
+      color: var(--muted);
+    }
+    .state-box .icon { font-size: 2.5rem; margin-bottom: .75rem; }
+    .state-box h2 { font-size: 1.1rem; color: var(--text); margin-bottom: .4rem; }
+    .state-box p  { font-size: .85rem; }
+
+    .spinner {
+      width: 36px; height: 36px;
+      border: 3px solid var(--border);
+      border-top-color: var(--gold);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      margin: 0 auto 1rem;
+      box-shadow: 0 0 12px rgba(217,119,6,0.10);
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Pagination */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: .5rem;
+      margin-top: 1.25rem;
+      font-size: .85rem;
+      color: var(--muted);
+    }
+    .pg-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: .35rem .75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      font-family: 'Karla', sans-serif;
+      font-weight: 500;
+      transition: border-color .15s, box-shadow .15s, color .15s;
+    }
+    .pg-btn:hover:not(:disabled) { border-color: var(--gold); color: var(--gold-dim); box-shadow: 0 1px 4px rgba(217,119,6,0.15); }
+    .pg-btn:disabled { opacity: .35; cursor: not-allowed; }
+    .pg-btn.active { border-color: var(--gold); color: var(--gold-dim); background: var(--surface-2); font-weight: 700; }
+
+    /* Status badges */
+    .status-badge {
+      display: inline-block;
+      padding: .2rem .6rem;
+      border-radius: 20px;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      white-space: nowrap;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    }
+    .status-Pending    { background: #FEF3C7; color: #92400E; border: 1px solid #FDE68A; }
+    .status-In-Progress { background: #EFF6FF; color: #1D4ED8; border: 1px solid #BFDBFE; }
+    .status-Ready      { background: #ECFDF5; color: #065F46; border: 1px solid #A7F3D0; }
+    .status-Completed  { background: #F3F4F6; color: #4B5563; border: 1px solid #D1D5DB; }
+    .status-Cancelled  { background: #FEF2F2; color: #991B1B; border: 1px solid #FECACA; }
+
+    /* Status select */
+    .status-select {
+      appearance: none;
+      -webkit-appearance: none;
+      border: 1px solid;
+      border-radius: 20px;
+      padding: .2rem 1.55rem .2rem .65rem;
+      font-size: .75rem;
+      font-weight: 600;
+      letter-spacing: .04em;
+      cursor: pointer;
+      outline: none;
+      transition: box-shadow .15s, opacity .15s;
+      white-space: nowrap;
+      background-repeat: no-repeat;
+      background-position: right .55rem center;
+      background-size: 7px;
+    }
+    .status-select.status-Pending     { background-color: #FEF3C7; color: #92400E; border-color: #FDE68A; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%2392400e' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
+    .status-select.status-In-Progress { background-color: #EFF6FF; color: #1D4ED8; border-color: #BFDBFE; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%231d4ed8' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
+    .status-select.status-Ready       { background-color: #ECFDF5; color: #065F46; border-color: #A7F3D0; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23065f46' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
+    .status-select.status-Completed   { background-color: #F3F4F6; color: #4B5563; border-color: #D1D5DB; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%234b5563' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
+    .status-select.status-Cancelled   { background-color: #FEF2F2; color: #991B1B; border-color: #FECACA; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 10 6'%3E%3Cpath fill='%23991b1b' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); }
+    .status-select:focus { box-shadow: 0 0 0 2px rgba(217,119,6,0.20); }
+    .status-select:disabled { opacity: .5; cursor: not-allowed; }
+
+    /* Logout button */
+    .btn-logout {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: .45rem 1.1rem;
+      border-radius: 6px;
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .05em;
+      cursor: pointer;
+      transition: background .15s, color .15s, border-color .15s, box-shadow .15s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+      font-family: 'Karla', sans-serif;
+    }
+    .btn-logout:hover { background: #FEF2F2; color: var(--red); border-color: #FECACA; box-shadow: 0 2px 8px rgba(220,38,38,0.12); }
+
+    .header-actions { display: flex; gap: .6rem; align-items: center; }
+
+    /* Action buttons */
+    .btn-action {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: .28rem .65rem;
+      border-radius: 6px;
+      font-size: .78rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background .12s, color .12s, border-color .12s, box-shadow .12s, transform .1s;
+      white-space: nowrap;
+      font-family: 'Karla', sans-serif;
+    }
+    .btn-action:hover { border-color: var(--gold); color: var(--gold-dim); box-shadow: 0 2px 6px rgba(37,99,235,0.15); transform: translateY(-1px); }
+    .btn-action:active:not(:disabled) { transform: translateY(0); }
+    .btn-delete:hover { border-color: var(--red); color: var(--red); box-shadow: 0 2px 6px rgba(220,38,38,0.15); }
+    .btn-confirm { border-color: var(--red) !important; color: var(--red) !important; }
+    .btn-confirm:hover { background: var(--red) !important; color: #fff !important; box-shadow: 0 2px 8px rgba(220,38,38,0.25) !important; }
+    .btn-cancel-del:hover { border-color: var(--muted); color: var(--text); }
+    .actions-cell { display: flex; gap: .4rem; align-items: center; flex-wrap: wrap; }
+  </style>
+</head>
+<body>
+
+<main id="root"></main>
+
+<script type="text/babel">
+const { useState, useEffect, useMemo } = React;
+
+const PAGE_SIZE = 15;
+const STATUS_OPTIONS = ['Pending', 'In Progress', 'Ready', 'Completed', 'Cancelled'];
+
+function fmt_date(s) {
+  if (!s) return null;
+  const d = new Date(s.includes('T') ? s : s.replace(' ', 'T') + 'Z');
+  return d.toLocaleString(undefined, {
+    month: 'short', day: 'numeric', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function fmt_pickup(s) {
+  if (!s) return null;
+  const d = new Date(s);
+  return d.toLocaleString(undefined, {
+    month: 'short', day: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+function SortIcon({ col, sort }) {
+  if (sort.col !== col) return <span className="sort-icon">⇅</span>;
+  return <span className="sort-icon">{sort.dir === 'asc' ? '↑' : '↓'}</span>;
+}
+
+function StatusBadge({ status }) {
+  const cls = 'status-badge status-' + (status || 'Pending').replace(' ', '-');
+  return <span className={cls}>{status || 'Pending'}</span>;
+}
+
+function App() {
+  const [orders, setOrders]         = useState([]);
+  const [loading, setLoading]       = useState(true);
+  const [error, setError]           = useState(null);
+  const [query, setQuery]           = useState('');
+  const [sort, setSort]             = useState({ col: 'id', dir: 'desc' });
+  const [page, setPage]             = useState(1);
+  const [confirmDelete, setConfirmDelete] = useState(null); // order id pending delete
+  const [updatingStatus, setUpdatingStatus] = useState({}); // { [id]: true }
+
+  const handleLogout = async () => {
+    await fetch('/api/logout', { method: 'POST' });
+    window.location.href = '/admin';
+  };
+
+  const fetchOrders = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch('/api/orders');
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const data = await res.json();
+      setOrders(data.orders || []);
+    } catch (e) {
+      setError(e.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchOrders(); }, []);
+
+  const handleStatusChange = async (orderId, newStatus) => {
+    setUpdatingStatus(s => ({ ...s, [orderId]: true }));
+    try {
+      const res = await fetch(`/api/orders/${orderId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
+    } catch (e) {
+      alert(`Failed to update status: ${e.message}`);
+    } finally {
+      setUpdatingStatus(s => ({ ...s, [orderId]: false }));
+    }
+  };
+
+  const handleDelete = async (orderId) => {
+    try {
+      const res = await fetch(`/api/orders/${orderId}`, { method: 'DELETE' });
+      if (res.status === 401) { window.location.href = '/login'; return; }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      setOrders(prev => prev.filter(o => o.id !== orderId));
+    } catch (e) {
+      alert(`Failed to delete order: ${e.message}`);
+    } finally {
+      setConfirmDelete(null);
+    }
+  };
+
+  const filtered = useMemo(() => {
+    const q = query.toLowerCase().trim();
+    if (!q) return orders;
+    return orders.filter(o => {
+      const itemNames = o.items.map(i => i.name).join(' ').toLowerCase();
+      return (
+        String(o.id).includes(q) ||
+        itemNames.includes(q) ||
+        (o.customer_name || '').toLowerCase().includes(q) ||
+        (o.phone_number  || '').toLowerCase().includes(q) ||
+        (o.status        || '').toLowerCase().includes(q)
+      );
+    });
+  }, [orders, query]);
+
+  const sorted = useMemo(() => {
+    const arr = [...filtered];
+    arr.sort((a, b) => {
+      let va = a[sort.col], vb = b[sort.col];
+      if (sort.col === 'total') { va = Number(va); vb = Number(vb); }
+      if (va == null) va = '';
+      if (vb == null) vb = '';
+      if (va < vb) return sort.dir === 'asc' ? -1 :  1;
+      if (va > vb) return sort.dir === 'asc' ?  1 : -1;
+      return 0;
+    });
+    return arr;
+  }, [filtered, sort]);
+
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PAGE_SIZE));
+  const safePage   = Math.min(page, totalPages);
+  const pageItems  = sorted.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  const toggleSort = (col) => {
+    setSort(s => s.col === col ? { col, dir: s.dir === 'asc' ? 'desc' : 'asc' } : { col, dir: 'desc' });
+    setPage(1);
+  };
+
+  const totalRevenue = orders.reduce((s, o) => s + (Number(o.total) || 0), 0);
+
+  const columns = [
+    { key: 'id',             label: 'Order #' },
+    { key: 'created_at',     label: 'Placed At' },
+    { key: 'items',          label: 'Items',    nosort: true },
+    { key: 'total',          label: 'Total' },
+    { key: 'customer_name',  label: 'Customer' },
+    { key: 'pickup_datetime',label: 'Pickup' },
+    { key: 'status',         label: 'Status' },
+    { key: 'actions',        label: 'Actions',  nosort: true },
+  ];
+
+  return (
+    <>
+      <div className="page-header">
+        <div>
+          <h1>Orders</h1>
+          <p className="subtitle">All orders</p>
+        </div>
+        <div className="header-actions">
+          <button
+            className="btn-refresh"
+            onClick={fetchOrders}
+            disabled={loading}
+          >
+            {loading ? 'Loading…' : '↻ Refresh'}
+          </button>
+          <button className="btn-logout" onClick={handleLogout}>
+            Sign Out
+          </button>
+        </div>
+      </div>
+
+      <div className="stats">
+        <div className="stat-card">
+          <div className="label">Total Orders</div>
+          <div className="value">{orders.length}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Total Revenue</div>
+          <div className="value">${totalRevenue.toFixed(2)}</div>
+        </div>
+        <div className="stat-card">
+          <div className="label">Avg Order Value</div>
+          <div className="value">
+            {orders.length ? `$${(totalRevenue / orders.length).toFixed(2)}` : '—'}
+          </div>
+        </div>
+        <div className="stat-card">
+          <div className="label">With Customer Info</div>
+          <div className="value">{orders.filter(o => o.customer_name).length}</div>
+        </div>
+      </div>
+
+      <div className="toolbar">
+        <input
+          className="search-input"
+          placeholder="Search by order #, item, customer name, phone or status…"
+          value={query}
+          onChange={e => { setQuery(e.target.value); setPage(1); }}
+        />
+      </div>
+
+      {loading ? (
+        <div className="state-box">
+          <div className="spinner" />
+          <p>Loading orders…</p>
+        </div>
+      ) : error ? (
+        <div className="state-box">
+          <div className="icon">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M12 2L2 20h20L12 2z"/><line x1="12" y1="9" x2="12" y2="13"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+            </svg>
+          </div>
+          <h2>Failed to load orders</h2>
+          <p>{error}</p>
+        </div>
+      ) : sorted.length === 0 ? (
+        <div className="state-box">
+          <div className="icon">
+            <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5">
+              <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2M9 5a2 2 0 0 0 2 2h2a2 2 0 0 0 2-2M9 5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2m-3 7h3m-3 4h3"/>
+            </svg>
+          </div>
+          <h2>{query ? 'No matching orders' : 'No orders yet'}</h2>
+          <p>{query ? 'Try a different search term.' : 'Orders will appear here once placed.'}</p>
+        </div>
+      ) : (
+        <>
+          <div className="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  {columns.map(c => (
+                    <th
+                      key={c.key}
+                      className={sort.col === c.key ? 'sorted' : ''}
+                      onClick={() => !c.nosort && toggleSort(c.key)}
+                      style={c.nosort ? { cursor: 'default' } : {}}
+                    >
+                      {c.label}
+                      {!c.nosort && <SortIcon col={c.key} sort={sort} />}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {pageItems.map(order => (
+                  <tr key={order.id}>
+                    <td><span className="order-id">#{order.id}</span></td>
+                    <td><span className="created-at">{fmt_date(order.created_at)}</span></td>
+                    <td>
+                      <div className="items-list">
+                        {order.items.map((item, i) => (
+                          <div key={i} className="item-row">
+                            <span className="item-qty">×{item.qty || 1}</span>
+                            <span className="item-name">{item.name}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td><span className="total">${Number(order.total).toFixed(2)}</span></td>
+                    <td>
+                      {order.customer_name ? (
+                        <div className="customer-info">
+                          <span className="customer-name">{order.customer_name}</span>
+                          {order.phone_number && (
+                            <span className="customer-phone">{order.phone_number}</span>
+                          )}
+                        </div>
+                      ) : (
+                        <span style={{ color: 'var(--muted)', fontSize: '.8rem' }}>—</span>
+                      )}
+                    </td>
+                    <td>
+                      {order.pickup_datetime
+                        ? <span className="pickup-time">{fmt_pickup(order.pickup_datetime)}</span>
+                        : <span className="no-pickup">—</span>
+                      }
+                    </td>
+                    <td>
+                      {(() => {
+                        const sc = (order.status || 'Pending').replace(' ', '-');
+                        return (
+                          <select
+                            className={`status-select status-${sc}`}
+                            value={order.status || 'Pending'}
+                            disabled={!!updatingStatus[order.id]}
+                            onChange={e => handleStatusChange(order.id, e.target.value)}
+                          >
+                            {STATUS_OPTIONS.map(s => (
+                              <option key={s} value={s}>{s}</option>
+                            ))}
+                          </select>
+                        );
+                      })()}
+                    </td>
+                    <td>
+                      {confirmDelete === order.id ? (
+                        <div className="actions-cell">
+                          <span style={{ fontSize: '.78rem', color: 'var(--muted)' }}>Delete?</span>
+                          <button
+                            className="btn-action btn-confirm"
+                            onClick={() => handleDelete(order.id)}
+                          >
+                            Yes
+                          </button>
+                          <button
+                            className="btn-action btn-cancel-del"
+                            onClick={() => setConfirmDelete(null)}
+                          >
+                            No
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="actions-cell">
+                          <button
+                            className="btn-action btn-delete"
+                            onClick={() => setConfirmDelete(order.id)}
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          {totalPages > 1 && (
+            <div className="pagination">
+              <span>{sorted.length} orders</span>
+              <button className="pg-btn" disabled={safePage === 1} onClick={() => setPage(p => p - 1)}>‹ Prev</button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
+                <button
+                  key={p}
+                  className={`pg-btn ${p === safePage ? 'active' : ''}`}
+                  onClick={() => setPage(p)}
+                >
+                  {p}
+                </button>
+              ))}
+              <button className="pg-btn" disabled={safePage === totalPages} onClick={() => setPage(p => p + 1)}>Next ›</button>
+            </div>
+          )}
+        </>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
