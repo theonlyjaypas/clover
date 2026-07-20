@@ -1,12 +1,14 @@
-# CLOVE Feature Improvements Implementation Plan
+# Clover Feature Improvements Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Add streaming chat responses, preference-aware personalization, and an analytics dashboard to the CLOVE restaurant app.
+**Goal:** Add streaming chat responses, preference-aware personalization, and an analytics dashboard to the Clover restaurant app.
 
 **Architecture:** Three additive features built on the existing FastAPI + SQLite + Claude Haiku stack. Streaming uses `AsyncAnthropic` + FastAPI `StreamingResponse` emitting SSE events. Personalization adds a `preferences` SQLite table and two new tools (`save_preferences`, `get_recommendations`). Analytics adds a single `/api/analytics` endpoint and a new `analytics.html` page using Chart.js.
 
 **Tech Stack:** Python 3.11+, FastAPI, `anthropic` SDK (sync + async), SQLite, React 18 (UMD, in-browser Babel), Chart.js 4 (CDN)
+
+**Product Name:** Use "Clover" consistently throughout (capitalized for proper nouns, lowercase for CSS variables and config keys)
 
 ## Global Constraints
 
@@ -16,6 +18,7 @@
 - CSS theme: `--accent: #2563EB`, `--bg: #EFF6FF`, `--surface: #FFFFFF`, `--border: #BFDBFE`, font: `Karla`
 - The old `/api/chat` endpoint must remain unchanged and functional
 - All admin routes (`/orders`, `/analytics`) must redirect to `/login` when unauthenticated
+- Product name is "Clover" (use "Clover" for UI text, "clover_*" for config keys and variables)
 
 ---
 
@@ -162,7 +165,7 @@ async def chat_stream(req: ChatRequest):
 
 Start the server:
 ```bash
-cd "/Users/jaypas/MLENG/demos/AGENT TOOL USE"
+cd "/Users/jaypas/MLENG/MINI/clover"
 uvicorn server:app --port 8000
 ```
 
@@ -442,9 +445,9 @@ def tool_get_recommendations(phone_number: str) -> str:
 
 Run Python interactively:
 ```bash
-cd "/Users/jaypas/MLENG/demos/AGENT TOOL USE"
+cd "/Users/jaypas/MLENG/MINI/clover"
 python3 -c "
-from db import tool_save_preferences, tool_get_recommendations
+from src.database.db import tool_save_preferences, tool_get_recommendations
 print(tool_save_preferences('555-1234', spice_level='hot', dietary='vegetarian'))
 print(tool_get_recommendations('555-1234'))
 print(tool_get_recommendations('999-0000'))
@@ -557,7 +560,7 @@ Find the entire `SYSTEM_PROMPT = """..."""` block in `server.py` and replace it 
 
 ```python
 SYSTEM_PROMPT = """\
-You are Priya, a warm and knowledgeable waiter at CLOVE, an authentic Indian restaurant. \
+You are Priya, a warm and knowledgeable waiter at Clover, an authentic Indian restaurant. \
 You help guests explore the menu, understand dishes, get recommendations, and place their order.
 
 Your personality:
@@ -611,7 +614,7 @@ Start the server and open `http://localhost:8000/chatbot`. Have this conversatio
 
 Verify in the DB that preferences were saved:
 ```bash
-sqlite3 "/Users/jaypas/MLENG/demos/AGENT TOOL USE/menu.db" \
+sqlite3 "/Users/jaypas/MLENG/MINI/clover/src/database/menu.db" \
   "SELECT * FROM preferences;"
 ```
 
@@ -772,7 +775,7 @@ git commit -m "feat: add /api/analytics endpoint and /analytics route"
 
 - [ ] **Step 1: Create `analytics.html`**
 
-Create `/Users/jaypas/MLENG/demos/AGENT TOOL USE/analytics.html` with the following content:
+Create `/Users/jaypas/MLENG/MINI/clover/static/templates/analytics.html` with the following content:
 
 ```html
 <!DOCTYPE html>
@@ -780,7 +783,7 @@ Create `/Users/jaypas/MLENG/demos/AGENT TOOL USE/analytics.html` with the follow
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CLOVE — Analytics</title>
+  <title>Clover — Analytics</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Karla:wght@300;400;500;600;700&family=Playfair+Display+SC:wght@400;700&display=swap" rel="stylesheet">

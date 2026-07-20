@@ -1,6 +1,6 @@
-# CLOVE Restaurant - Deployment Guide
+# Clover Restaurant - Deployment Guide
 
-Comprehensive guide for deploying the CLOVE AI-powered restaurant ordering system to production environments.
+Comprehensive guide for deploying the Clover AI-powered restaurant ordering system to production environments.
 
 ## Table of Contents
 
@@ -28,8 +28,8 @@ Comprehensive guide for deploying the CLOVE AI-powered restaurant ordering syste
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/clove-restaurant.git
-cd clove-restaurant
+git clone https://github.com/yourusername/clover-restaurant.git
+cd clover-restaurant
 ```
 
 ### Step 2: Create Python Virtual Environment
@@ -143,7 +143,7 @@ services:
 
 ```bash
 # Build the image
-docker build -t clove-restaurant:latest .
+docker build -t clover-restaurant:latest .
 
 # Run the container
 docker run -d \
@@ -153,8 +153,8 @@ docker run -d \
   -e ADMIN_PASSWORD=secure_password \
   -v $(pwd)/src/database:/app/src/database \
   -v $(pwd)/logs:/app/logs \
-  --name clove-app \
-  clove-restaurant:latest
+  --name clover-app \
+  clover-restaurant:latest
 
 # Or use Docker Compose
 docker-compose up -d
@@ -184,7 +184,7 @@ docker-compose up -d
 
 2. Initialize EB application:
    ```bash
-   eb init -p python-3.11 clove-restaurant
+   eb init -p python-3.11 clover-restaurant
    ```
 
 3. Create environment:
@@ -217,7 +217,7 @@ docker-compose up -d
 
 3. Create app and deploy:
    ```bash
-   heroku create clove-restaurant
+   heroku create clover-restaurant
    heroku config:set ANTHROPIC_API_KEY=your_key
    heroku config:set ADMIN_USERNAME=admin
    heroku config:set ADMIN_PASSWORD=secure_password
@@ -234,13 +234,13 @@ docker-compose up -d
 1. Create Dockerfile (as above)
 2. Build and push to Container Registry:
    ```bash
-   gcloud builds submit --tag gcr.io/your-project/clove-restaurant
+   gcloud builds submit --tag gcr.io/your-project/clover-restaurant
    ```
 
 3. Deploy to Cloud Run:
    ```bash
-   gcloud run deploy clove-restaurant \
-     --image gcr.io/your-project/clove-restaurant \
+   gcloud run deploy clover-restaurant \
+     --image gcr.io/your-project/clover-restaurant \
      --platform managed \
      --region us-central1 \
      --set-env-vars ANTHROPIC_API_KEY=your_key,ADMIN_USERNAME=admin,ADMIN_PASSWORD=secure_password
@@ -251,15 +251,15 @@ docker-compose up -d
 1. Create Azure Container Registry
 2. Build and push image:
    ```bash
-   az acr build --registry your-registry --image clove-restaurant:latest .
+   az acr build --registry your-registry --image clover-restaurant:latest .
    ```
 
 3. Deploy:
    ```bash
    az container create \
      --resource-group your-group \
-     --name clove-app \
-     --image your-registry.azurecr.io/clove-restaurant:latest \
+     --name clover-app \
+     --image your-registry.azurecr.io/clover-restaurant:latest \
      --environment-variables ANTHROPIC_API_KEY=your_key
    ```
 
@@ -288,7 +288,7 @@ docker-compose up -d
 ANTHROPIC_API_KEY=sk-ant-xxxxxxxxxxxx
 ADMIN_USERNAME=admin
 ADMIN_PASSWORD=very-secure-password-with-special-chars!@#$%
-DB_PATH=/var/lib/clove/menu.db
+DB_PATH=/var/lib/clover/menu.db
 CORS_ORIGINS=["https://yourdomain.com"]
 ```
 
@@ -352,7 +352,7 @@ hashed_password = pwd_context.hash("password")
 
 #### Using Nginx as Reverse Proxy
 
-Create `/etc/nginx/sites-available/clove`:
+Create `/etc/nginx/sites-available/clover`:
 
 ```nginx
 server {
@@ -388,7 +388,7 @@ server {
 
 Enable site:
 ```bash
-sudo ln -s /etc/nginx/sites-available/clove /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/clover /etc/nginx/sites-enabled/
 sudo nginx -t
 sudo systemctl restart nginx
 ```
@@ -450,7 +450,7 @@ logging.basicConfig(
 
 Use logrotate on Linux:
 
-Create `/etc/logrotate.d/clove`:
+Create `/etc/logrotate.d/clover`:
 
 ```
 /app/logs/*.log {
@@ -582,7 +582,7 @@ docker stats <container-id>
 Use Nginx upstream to distribute traffic:
 
 ```nginx
-upstream clove_backend {
+upstream clover_backend {
     server localhost:8001;
     server localhost:8002;
     server localhost:8003;
@@ -594,7 +594,7 @@ server {
     server_name yourdomain.com;
 
     location / {
-        proxy_pass http://clove_backend;
+        proxy_pass http://clover_backend;
     }
 }
 ```
@@ -603,7 +603,7 @@ Run multiple instances:
 
 ```bash
 for i in {1..4}; do
-    docker run -d -p 800$i:8000 clove-restaurant:latest
+    docker run -d -p 800$i:8000 clover-restaurant:latest
 done
 ```
 
@@ -626,20 +626,20 @@ Create `k8s-deployment.yaml`:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: clove-restaurant
+  name: clover-restaurant
 spec:
   replicas: 3
   selector:
     matchLabels:
-      app: clove
+      app: clover
   template:
     metadata:
       labels:
-        app: clove
+        app: clover
     spec:
       containers:
-      - name: clove
-        image: clove-restaurant:latest
+      - name: clover
+        image: clover-restaurant:latest
         ports:
         - containerPort: 8000
         env:
@@ -705,7 +705,7 @@ In case of issues after deployment:
 
 ```bash
 # Docker rollback
-docker run -d --name clove-rollback clove-restaurant:previous-tag
+docker run -d --name clover-rollback clover-restaurant:previous-tag
 
 # Git rollback
 git revert <commit-hash>

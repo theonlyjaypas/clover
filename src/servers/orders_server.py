@@ -1,5 +1,5 @@
 """
-CLOVE Orders Server — FastAPI orders management dashboard with admin auth.
+Clover Orders Server — FastAPI orders management dashboard with admin auth.
 Serves login.html / orders.html and handles /api/orders CRUD + auth endpoints.
 
 Run with:
@@ -20,7 +20,7 @@ from pydantic import BaseModel
 
 from ..database.db import DB_PATH, _ensure_orders_table
 
-app = FastAPI(title="CLOVE Orders API")
+app = FastAPI(title="Clover Orders API")
 
 FRONTEND_PATH = Path(__file__).parent.parent.parent / "static/templates/orders.html"
 LOGIN_PATH    = Path(__file__).parent.parent.parent / "static/templates/login.html"
@@ -39,7 +39,7 @@ _PASS_HASH = hashlib.pbkdf2_hmac(
 # In-memory session store: token -> expiry (unix timestamp)
 _sessions: dict[str, float] = {}
 _SESSION_TTL = 8 * 3600   # 8 hours
-_COOKIE     = "clove_session"
+_COOKIE     = "clover_session"
 
 
 def _verify_password(password: str) -> bool:

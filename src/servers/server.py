@@ -1,5 +1,5 @@
 """
-CLOVE Restaurant Backend — FastAPI + Claude with tool use.
+Clover Restaurant Backend — FastAPI + Claude with tool use.
 Serves chatbot.html and proxies AI chat using Anthropic tool-use loop.
 """
 from __future__ import annotations
@@ -22,7 +22,7 @@ from pydantic import BaseModel
 
 load_dotenv()
 
-app = FastAPI(title="CLOVE Restaurant API")
+app = FastAPI(title="Clover Restaurant API")
 
 _client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
@@ -50,7 +50,7 @@ _PASS_HASH = hashlib.pbkdf2_hmac("sha256", _admin_pw_raw.encode(), _PASS_SALT.en
 
 _sessions: dict[str, float] = {}
 _SESSION_TTL = 8 * 3600
-_COOKIE      = "clove_session"
+_COOKIE      = "clover_session"
 
 
 def _verify_password(password: str) -> bool:
@@ -283,7 +283,7 @@ TOOLS: list[dict] = [
 ]
 
 SYSTEM_PROMPT = """\
-You are Priya, a warm and knowledgeable waiter at CLOVE, an authentic Indian restaurant. \
+You are Priya, a warm and knowledgeable waiter at Clover, an authentic Indian restaurant. \
 You help guests explore the menu, understand dishes, get recommendations, and place their order.
 
 Your personality:
@@ -431,7 +431,7 @@ async def get_menu():
             }
             for cat in cats
         ]
-    return {"restaurant": "CLOVE", "menu": menu}
+    return {"restaurant": "Clover", "menu": menu}
 
 
 # ── Orders endpoint ───────────────────────────────────────────────────────────

@@ -1,6 +1,6 @@
-# CLOVE Restaurant - AI-Powered Ordering System
+# Clover Restaurant - AI-Powered Ordering System
 
-A modern restaurant ordering platform powered by Claude AI with tool-use capabilities. CLOVE provides an intelligent chatbot interface for customers to browse the menu, get recommendations, and place orders seamlessly.
+A modern restaurant ordering platform powered by Claude AI with tool-use capabilities. Clover provides an intelligent chatbot interface for customers to browse the menu, get recommendations, and place orders seamlessly.
 
 ## Features
 
@@ -62,8 +62,8 @@ A modern restaurant ordering platform powered by Claude AI with tool-use capabil
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/clove-restaurant.git
-   cd clove-restaurant
+   git clone https://github.com/yourusername/clover-restaurant.git
+   cd clover-restaurant
    ```
 
 2. **Create virtual environment**
@@ -152,7 +152,7 @@ Retrieve the complete menu with all categories and items.
 Response:
 ```json
 {
-  "restaurant": "CLOVE",
+  "restaurant": "Clover",
   "menu": [
     {
       "category": "Soups",
