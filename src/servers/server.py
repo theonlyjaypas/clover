@@ -26,6 +26,11 @@ app = FastAPI(title="CLOVE Restaurant API")
 
 _client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
+
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy"}
+
 DB_PATH       = os.getenv("DB_PATH", os.path.join(os.path.dirname(__file__), "../../src/database/menu.db"))
 FRONTEND_PATH = os.path.join(os.path.dirname(__file__), "../../static/templates/chatbot.html")
 MODEL         = "claude-haiku-4-5-20251001"
